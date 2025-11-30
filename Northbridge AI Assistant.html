@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Northbridge AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #1a1a1a;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Welcome page styles */
+        .welcome-container {
+            width: 100%;
+            max-width: 720px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 50px 50px 40px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 18px;
+            z-index: -1;
+            opacity: 0.6;
+            filter: blur(8px);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+            margin: 30px 0;
+        }
+
+        .welcome-content h2 {
+            font-size: 26px;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .welcome-content p {
+            color: #666;
+            margin-bottom: 28px;
+            font-size: 17px;
+        }
+
+        .preset-question {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 20px;
+            padding: 24px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            position: relative;
+            padding-bottom: 60px;
+            overflow: hidden;
+        }
+
+        .preset-question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .preset-question:hover {
+            border-color: #667eea;
+            background: #fafbff;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
+        }
+
+        .preset-question:hover::before {
+            transform: scaleX(1);
+        }
+
+        .question-text {
+            font-size: 15px;
+            color: #475569;
+            margin-bottom: 10px;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .question-hint {
+            font-size: 14px;
+            color: #888;
+            font-weight: 400;
+            position: absolute;
+            left: 24px;
+            bottom: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .send-indicator {
+            position: absolute;
+            right: 24px;
+            bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .preset-question:hover .send-indicator {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .preset-question:hover .question-hint {
+            color: #667eea;
+        }
+
+        /* AI avatar styles */
+        .ai-avatar {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 25px;
+            position: relative;
+        }
+
+        .avatar-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.4;
+            filter: blur(15px);
+        }
+
+        .avatar-face {
+            width: 70%;
+            height: 70%;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-eyes {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 25px;
+        }
+
+        .avatar-eye {
+            width: 16px;
+            height: 16px;
+            background: #4a5568;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 4s infinite;
+        }
+
+        .avatar-eye::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .avatar-mouth {
+            width: 30px;
+            height: 8px;
+            background: #4a5568;
+            border-radius: 4px;
+            margin: 15px auto 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .ai-avatar:hover .avatar-mouth {
+            height: 12px;
+            border-radius: 6px 6px 12px 12px;
+        }
+
+        .avatar-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.4));
+            animation: pulse 3s infinite alternate;
+        }
+
+        @keyframes blink {
+            0%, 45%, 55%, 100% {
+                height: 16px;
+            }
+            50% {
+                height: 2px;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Chat page styles */
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 85vh;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-header {
+            padding: 20px 28px;
+            background: white;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .back-button {
+            background: #f8f9fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 10px 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .back-button:hover {
+            background: #f0f2f5;
+            border-color: #d0d0d0;
+            transform: translateX(-2px);
+        }
+
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .chat-title-text {
+            font-size: 18px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            height: 36px;
+            font-weight: 600;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            background: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 28px;
+            animation: messageAppear 0.4s ease-out;
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 78%;
+            text-align: left;
+            position: relative;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+            border: none;
+            line-height: 1.6;
+            animation: messageSlide 0.4s ease-out;
+        }
+
+        .user-message .message-content::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            right: 10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #6366f1;
+            transform: rotate(45deg);
+        }
+
+        .ai-message .message-content {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 100%;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .ai-message .message-content::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+            transform: rotate(-45deg);
+        }
+
+        .thinking-indicator {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            animation: fadeIn 0.5s ease-out;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .thinking-indicator::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 10px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px transparent;
+            border-top: 10px solid white;
+            transform: rotate(-45deg);
+        }
+
+        .thinking-text {
+            color: #888;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #888;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* AI response content styles */
+        .ai-content {
+            line-height: 1.25;
+            font-size: 15px;
+            color: #374151;
+        }
+
+        .ai-content p {
+            margin-bottom: 14px;
+            opacity: 0;
+            animation: typeIn 0.8s ease-out forwards;
+            line-height: 1.25;
+        }
+
+        .ai-content .analysis-section {
+            margin: 20px 0;
+        }
+
+        .ai-content .analysis-title {
+            font-weight: 600;
+            margin-bottom: 14px;
+            color: #1a1a1a;
+            font-size: 17px;
+            opacity: 0;
+            animation: typeIn 0.8s ease-out forwards;
+            letter-spacing: -0.3px;
+            line-height: 1.25;
+        }
+
+        .ai-content .strategy-container {
+            margin: 16px 0;
+        }
+
+        .ai-content .strategy-item {
+            margin: 16px 0;
+            padding: 0;
+            opacity: 0;
+            animation: typeIn 0.8s ease-out forwards;
+        }
+
+        .ai-content .strategy-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+            font-size: 16px;
+            letter-spacing: -0.2px;
+            line-height: 1.25;
+        }
+
+        .ai-content .strategy-desc {
+            color: #4b5563;
+            margin-bottom: 10px;
+            font-size: 15px;
+            line-height: 1.25;
+        }
+
+        /* Professional example box styles */
+        .ai-content .example-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 10px;
+            margin-bottom: 18px;
+            border-left: 4px solid #6366f1;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .ai-content .example-text {
+            color: #4b5563;
+            line-height: 1.25;
+            font-size: 15px;
+            margin: 0;
+            font-style: normal;
+        }
+
+        /* Sentence-by-sentence display */
+        .sentence {
+            opacity: 0;
+            animation: typeIn 0.8s ease-out forwards;
+            margin-bottom: 14px;
+            line-height: 1.25;
+        }
+
+        .strategy-content {
+            margin-top: 14px;
+            margin-bottom: 18px;
+        }
+
+        /* Typewriter effect */
+        .typewriter {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end);
+        }
+
+        /* Typewriter effect text container */
+        .typed-text {
+            overflow: hidden;
+            border-right: 2px solid #667eea;
+            white-space: nowrap;
+            margin: 0;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        /* Completion notice styles */
+        .completion-notice {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 18px 24px;
+            border-radius: 16px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            animation: fadeInUp 0.8s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .completion-notice svg {
+            flex-shrink: 0;
+        }
+
+        .completion-text {
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes typeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% { 
+                transform: scale(0.8); 
+                opacity: 0.5; 
+            }
+            40% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+        }
+
+        /* Typewriter animation */
+        @keyframes typewriter {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #667eea; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Scrollbar styles */
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-container, .chat-container {
+                height: 90vh;
+                padding: 40px 24px;
+            }
+            
+            .message-content {
+                max-width: 88%;
+            }
+            
+            .chat-header {
+                padding: 16px 20px;
+            }
+            
+            .messages-container {
+                padding: 20px;
+            }
+            
+            .welcome-container {
+                padding: 40px 24px 30px;
+            }
+            
+            .preset-question {
+                padding-bottom: 60px;
+            }
+            
+            .ai-avatar {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome page -->
+    <div class="welcome-container" id="welcomePage">
+        <!-- AI avatar -->
+        <div class="ai-avatar">
+            <div class="avatar-container">
+                <div class="avatar-glow"></div>
+                <div class="avatar-face">
+                    <div class="avatar-eyes">
+                        <div class="avatar-eye"></div>
+                        <div class="avatar-eye"></div>
+                    </div>
+                    <div class="avatar-mouth"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="logo">
+            <div class="logo-icon">NB</div>
+            <h1>Northbridge AI Assistant</h1>
+        </div>
+        <div class="subtitle">Professional Sales Strategy Analysis and Advice</div>
+        
+        <div class="divider"></div>
+        
+        <div class="welcome-content">
+            <h2>Hello! I'm Northbridge AI Assistant</h2>
+            <p>I can help you analyze customer situations and provide professional sales strategy recommendations</p>
+            
+            <div class="preset-question" id="presetQuestion">
+                <div class="question-text">I'm introducing our CRM system to Ms. Emma Collins, the Marketing Director of a medium-sized manufacturing firm based in Birmingham. She currently uses Excel for customer management and is concerned that switching systems would be too complicated. How should I respond?</div>
+                <div class="question-hint">Click to send this question and begin analysis</div>
+                <div class="send-indicator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat page -->
+    <div class="chat-container hidden" id="chatPage">
+        <div class="chat-header">
+            <div class="chat-title" style="margin-left: 6px;">
+                <div class="logo-icon" style="width: 36px; height: 36px; font-size: 16px;">NB</div>
+                <div class="chat-title-text" style="margin-left: 12px;">Northbridge AI Assistant</div>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <!-- Messages will be added dynamically via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const welcomePage = document.getElementById('welcomePage');
+            const chatPage = document.getElementById('chatPage');
+            const presetQuestion = document.getElementById('presetQuestion');
+            const messagesContainer = document.getElementById('messagesContainer');
+            
+            // Switch to chat page
+            function goToChatPage() {
+                welcomePage.classList.add('hidden');
+                chatPage.classList.remove('hidden');
+                
+                // Add user message
+                addMessage('user', 'I\'m introducing our CRM system to Ms. Emma Collins, the Marketing Director of a medium-sized manufacturing firm based in Birmingham. She currently uses Excel for customer management and is concerned that switching systems would be too complicated. How should I respond?');
+                
+                // Show thinking process
+                const thinkingElement = showThinkingProcess();
+                
+                // Simulate AI thinking and response
+                setTimeout(() => {
+                    // Remove thinking process
+                    if (thinkingElement && thinkingElement.parentNode) {
+                        thinkingElement.parentNode.removeChild(thinkingElement);
+                    }
+                    
+                    // Add AI response
+                    addAIResponse();
+                }, 1500);
+            }
+            
+            // Return to welcome page
+            function goToWelcomePage() {
+                chatPage.classList.add('hidden');
+                welcomePage.classList.remove('hidden');
+                // Clear message container
+                messagesContainer.innerHTML = '';
+            }
+            
+            // Preset question click event
+            presetQuestion.addEventListener('click', goToChatPage);
+            
+            // Add message to message container
+            function addMessage(sender, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text';
+                textDiv.textContent = text;
+                
+                contentDiv.appendChild(textDiv);
+                messageDiv.appendChild(contentDiv);
+                
+                messagesContainer.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Show thinking process
+            function showThinkingProcess() {
+                const thinkingDiv = document.createElement('div');
+                thinkingDiv.className = 'thinking-indicator';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'thinking-content';
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'thinking-text';
+                textDiv.textContent = 'Analyzing customer situation';
+                
+                const dotsDiv = document.createElement('div');
+                dotsDiv.className = 'typing-dots';
+                dotsDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                
+                contentDiv.appendChild(textDiv);
+                contentDiv.appendChild(dotsDiv);
+                
+                thinkingDiv.appendChild(contentDiv);
+                
+                messagesContainer.appendChild(thinkingDiv);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                return thinkingDiv;
+            }
+            
+            // Add completion notice
+            function addCompletionNotice() {
+                const noticeDiv = document.createElement('div');
+                noticeDiv.className = 'completion-notice';
+                
+                const noticeContent = document.createElement('div');
+                noticeContent.className = 'completion-text';
+                noticeContent.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        <div>
+                            <strong>Analysis Complete!</strong> Please carefully review the AI's recommendations and decide whether to use them. Then, close this window to return to the survey.
+                        </div>
+                    </div>
+                `;
+                
+                noticeDiv.appendChild(noticeContent);
+                messagesContainer.appendChild(noticeDiv);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Typewriter effect function - optimized speed and smoothness
+            function typeWriter(element, text, speed = 15, callback) {
+                let i = 0;
+                element.innerHTML = '';
+                
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else if (callback) {
+                        setTimeout(callback, 100);
+                    }
+                }
+                
+                type();
+            }
+            
+            // Add AI response
+            function addAIResponse() {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ai-message';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                // Create AI content container
+                const aiContent = document.createElement('div');
+                aiContent.className = 'ai-content';
+                
+                contentDiv.appendChild(aiContent);
+                messageDiv.appendChild(contentDiv);
+                messagesContainer.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Show detailed content in parts
+                setTimeout(() => addInitialText(aiContent), 200);
+            }
+            
+            function addInitialText(parent) {
+                const p = document.createElement('p');
+                p.className = 'sentence';
+                parent.appendChild(p);
+                
+                // Use typewriter effect
+                typeWriter(p, 'Based on your description, I have analyzed Ms. Collins\'s situation:', 15, () => {
+                    setTimeout(() => addAnalysisSection(parent), 200);
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            function addAnalysisSection(parent) {
+                const section = document.createElement('div');
+                section.className = 'analysis-section';
+                parent.appendChild(section);
+                
+                const title = document.createElement('div');
+                title.className = 'analysis-title';
+                section.appendChild(title);
+                
+                // Use typewriter effect to display title
+                typeWriter(title, 'Customer Analysis Results', 15, () => {
+                    const content = [
+                        'Customer Type: Hesitant Customer',
+                        'Current Status: Uses Excel for customer management, concerned about system switching complexity',
+                        'Main Concerns: Implementation costs, learning curve, data migration'
+                    ];
+                    
+                    let index = 0;
+                    
+                    function addNextLine() {
+                        if (index < content.length) {
+                            const p = document.createElement('p');
+                            p.className = 'sentence';
+                            section.appendChild(p);
+                            
+                            typeWriter(p, content[index], 15, () => {
+                                index++;
+                                setTimeout(addNextLine, 150);
+                            });
+                            
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        } else {
+                            setTimeout(() => addStrategyItems(parent), 300);
+                        }
+                    }
+                    
+                    addNextLine();
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            function addStrategyItems(parent) {
+                const strategies = [
+                    {
+                        title: "1. Build Trust and Empathy",
+                        sentences: [
+                            "Acknowledge the practicality of Excel but point out its limitations, share success stories",
+                            "Example dialogue:",
+                            "Ms. Collins, I understand your concerns about changing systems. Many businesses start with Excel, but as customer numbers grow, they often face issues with scattered data and collaboration challenges."
+                        ]
+                    },
+                    {
+                        title: "2. Demonstrate Value and Ease of Use", 
+                        sentences: [
+                            "Highlight similarities to Excel, demonstrate one-click import functionality",
+                            "Example dialogue:",
+                            "Northbridge CRM has an intuitive interface design that you'll find familiar. We can help you import your existing Excel data with one click, without losing any information."
+                        ]
+                    },
+                    {
+                        title: "3. Provide Assurance and Support",
+                        sentences: [
+                            "Emphasize full implementation support, offer free training",
+                            "Example dialogue:",
+                            "We have a professional implementation team that provides full support, including data migration, system configuration, and team training. Similar businesses typically transition smoothly within 2 weeks."
+                        ]
+                    },
+                    {
+                        title: "4. Low-Risk Trial Option",
+                        sentences: [
+                            "Offer a 30-day free trial, set phased goals",
+                            "Example dialogue:",
+                            "I recommend starting with a 30-day trial, where we help you import some data to experience the core features. After the trial, you can decide whether to continue based on the actual results."
+                        ]
+                    }
+                ];
+                
+                // Add strategy title
+                const strategyTitle = document.createElement('div');
+                strategyTitle.className = 'analysis-title';
+                parent.appendChild(strategyTitle);
+                
+                // Use typewriter effect to display strategy title
+                typeWriter(strategyTitle, 'Targeted Sales Strategies', 15, () => {
+                    // Create strategy container
+                    const strategyContainer = document.createElement('div');
+                    strategyContainer.className = 'strategy-container';
+                    parent.appendChild(strategyContainer);
+                    
+                    let strategyIndex = 0;
+                    
+                    function addNextStrategy() {
+                        if (strategyIndex < strategies.length) {
+                            const strategy = strategies[strategyIndex];
+                            
+                            // Strategy title
+                            const titleDiv = document.createElement('div');
+                            titleDiv.className = 'strategy-title';
+                            strategyContainer.appendChild(titleDiv);
+                            
+                            // Use typewriter effect to display strategy title
+                            typeWriter(titleDiv, strategy.title, 15, () => {
+                                // Create strategy content container
+                                const strategyContent = document.createElement('div');
+                                strategyContent.className = 'strategy-content';
+                                strategyContainer.appendChild(strategyContent);
+                                
+                                let sentenceIndex = 0;
+                                
+                                function addNextSentence() {
+                                    if (sentenceIndex < strategy.sentences.length) {
+                                        const sentence = strategy.sentences[sentenceIndex];
+                                        
+                                        if (sentenceIndex === strategy.sentences.length - 1) {
+                                            // Example dialogue with special styling
+                                            const exampleBox = document.createElement('div');
+                                            exampleBox.className = 'example-box';
+                                            strategyContent.appendChild(exampleBox);
+                                            
+                                            const exampleText = document.createElement('div');
+                                            exampleText.className = 'example-text';
+                                            exampleBox.appendChild(exampleText);
+                                            
+                                            // Use typewriter effect to display example dialogue
+                                            typeWriter(exampleText, sentence, 15, () => {
+                                                sentenceIndex++;
+                                                setTimeout(addNextSentence, 200);
+                                            });
+                                        } else {
+                                            const p = document.createElement('p');
+                                            p.className = 'strategy-desc';
+                                            strategyContent.appendChild(p);
+                                            
+                                            // Use typewriter effect to display strategy description
+                                            typeWriter(p, sentence, 15, () => {
+                                                sentenceIndex++;
+                                                setTimeout(addNextSentence, 150);
+                                            });
+                                        }
+                                        
+                                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                                    } else {
+                                        strategyIndex++;
+                                        setTimeout(addNextStrategy, 300);
+                                    }
+                                }
+                                
+                                addNextSentence();
+                            });
+                            
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        } else {
+                            // Add notice after all strategies are displayed
+                            setTimeout(() => {
+                                addCompletionNotice();
+                            }, 500);
+                        }
+                    }
+                    
+                    addNextStrategy();
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
